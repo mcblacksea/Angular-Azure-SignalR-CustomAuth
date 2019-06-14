@@ -1,0 +1,71 @@
+<div class="spacer">
+    <span>Seed Database - Run Once For All Browser Instances</span>
+    <button [disabled]="isDatabaseSeeded"
+        (click)="seedDatabase()">Seed Database</button>
+</div>
+
+<div *ngIf="isDatabaseSeeded"
+    class="spacer">
+    <span>Seeded Database Users You Can Use To Login Below</span>
+    <div>User Name - Password</div>
+    <div>John - john</div>
+    <div>Sue - sue</div>
+    <div>Tim - tim</div>
+</div>
+
+<hr *ngIf="isDatabaseSeeded" />
+
+<div *ngIf="isDatabaseSeeded"
+    class="spacer">
+    <span>Login</span>
+    <input [disabled]="isLoggedIn"
+        #userName
+        value="John"
+        placeholder="user name">
+    <input [disabled]="isLoggedIn"
+        #password
+        value="john"
+        placeholder="password">
+    <button [disabled]="isRegistered"
+        (click)="login(userName.value, password.value)">Login</button>
+</div>
+
+<hr *ngIf="isLoggedIn" />
+
+<div *ngIf="isLoggedIn">
+    <div class="spacer">
+        <span>Register Yourself - Start SignalR Client</span>
+        <button [disabled]="isRegistered"
+            (click)="registerUser()">Register Yourself</button>
+    </div>
+</div>
+<div *ngIf="isRegistered">
+    <div class="spacer">
+        <span>Send Message To All Users</span>
+        <input #message
+            placeholder="enter message">
+        <button (click)="sendToAllUsers(message.value)">Send Message</button>
+    </div>
+
+    <div class="spacer">
+        <span>Send Message To Selected User</span>
+        <select #sendToUserName>
+            <option *ngFor="let user of users"
+                value="{{ user.id }}">
+                {{ user.userName}}
+            </option>
+        </select>
+        <input #messageForUserName
+            placeholder="enter message">
+        <button (click)="sendToUser(messageForUserName.value, sendToUserName.value)">Send Message</button>
+    </div>
+</div>
+
+<hr />
+
+<div class="spacer">
+    <span>Received Messages</span>
+    <div *ngFor="let message of messages">
+        {{ message }}
+    </div>
+</div>
