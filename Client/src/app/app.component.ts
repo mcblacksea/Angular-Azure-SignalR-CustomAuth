@@ -58,7 +58,7 @@ export class AppComponent {
     this._usersService.login(userName, password).subscribe(tokenItem => {
       this.isLoggedIn = true;
       this._token = tokenItem.token;
-      let userItem = _.find(this.users, u => u.userName === userName);
+      let userItem = _.find(this.users, u => u.userName.toLowerCase() === userName.toLowerCase());
       if (userItem) {
         this.loggedInUserItem = userItem;
         this.log(`${userItem.userName} logged in.`);
