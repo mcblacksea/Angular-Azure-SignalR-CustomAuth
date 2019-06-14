@@ -25,8 +25,8 @@ namespace SignalRCustomAuthServer.Api {
             var combinedFilter = TableQuery.CombineFilters(partitionKeyfilter, TableOperators.And, userNameFilter);
             var tableQuery = new TableQuery<UserEntity>().Where(combinedFilter);
 
-            TableContinuationToken token = null;
-            var results = await userCloudTable.ExecuteQuerySegmentedAsync<UserEntity>(tableQuery, token);
+            TableContinuationToken continuationToken = null;
+            var results = await userCloudTable.ExecuteQuerySegmentedAsync<UserEntity>(tableQuery, continuationToken);
             if (results.Results.Count == 1) {
                 return results.Results[0];
             }
@@ -82,6 +82,20 @@ namespace SignalRCustomAuthServer.Api {
             [Table(Global.UserTableName, Connection = "AzureWebJobsStorage")] CloudTable userCloudTable,
             ILogger log) {
 
+            var userItemModels = new List<UserItemModel>();
+
+            TableContinuationToken continuationToken = null;
+            var entities = await userCloudTable.ExecuteQuerySegmentedAsync<UserEntity>(new TableQuery<UserEntity>(), continuationToken);
+            if (entities.Results.Count > 0) {
+                foreach (var userEntity in entities.Results) {
+                    userItemModels.Add(userEntity.ToUserItemModel());
+                    log.LogInformation($"User {userEntity.UserName} in database.");
+                }
+                return new OkObjectResult(userItemModels);
+            }
+            
+            // database is empty - now seed it
+
             var userA = MakeUserEntity("John", "john", "56bc6a96-d6dc-406e-b36f-46373936c3bd");
             var userB = MakeUserEntity("Sue", "sue", "8f9b0fa5-4afe-4120-9e99-4f32148a79fc");
             var userC = MakeUserEntity("Tim", "tim", "197f8915-a37f-41d0-97da-5514d85966b5");
@@ -92,12 +106,11 @@ namespace SignalRCustomAuthServer.Api {
             batchOperation.InsertOrReplace(userC);
 
             var results = await userCloudTable.ExecuteBatchAsync(batchOperation);
-            var userItemModels = new List<UserItemModel>();
-
+            
             foreach (var result in results) {
                 if (result.Result is UserEntity userEntity) {
                     userItemModels.Add(userEntity.ToUserItemModel());
-                    log.LogInformation($"User {userEntity.UserName} in database.");
+                    log.LogInformation($"User {userEntity.UserName} added to database.");
                 }
             }
 
@@ -142,7 +155,7 @@ namespace SignalRCustomAuthServer.Api {
                 using (var sr = new StreamReader(req.Body)) {
                     var message = sr.ReadToEnd();
 
-                    log.LogInformation($"Sending, {message} to {userId}.");
+                    log.LogInformation($"Sending, {message} to {userId} only.");
 
                     await signalRMessages.AddAsync(
                         new SignalRMessage {
