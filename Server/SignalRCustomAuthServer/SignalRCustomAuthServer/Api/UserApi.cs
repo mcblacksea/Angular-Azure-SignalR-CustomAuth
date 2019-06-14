@@ -18,7 +18,9 @@ namespace SignalRCustomAuthServer.Api {
     using SignalRCustomAuthServer.Model;
 
     public static class UserApi {
-
+        
+        // in a real world app using Table Storage with thousands of users, create a second table that maps a userName to the full user entity table.
+        // or, use CosmosDB which supports multiple indexes.
         static async Task<UserEntity> GetUserEntityByUserName(CloudTable userCloudTable, String userName) {
             var partitionKeyfilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, Global.UserPartitionKey);
             var userNameFilter = TableQuery.GenerateFilterCondition("UserName", QueryComparisons.Equal, userName);
