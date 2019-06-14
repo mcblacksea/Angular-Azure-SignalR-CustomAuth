@@ -22,39 +22,35 @@ export class AppComponent {
 
   constructor(private _signalRService: SignalRService, private _usersService: UsersService) { }
 
-  registerUser() {
+  startSignalRClient() {
     if (this.loggedInUserItem && this._token) {
 
       this._signalRService.getSignalRConnectionInfo(this._token).subscribe(results => {
         this._signalRService.init(results);
         this._signalRService.messages.subscribe(message => {
-          this.messages.push(message);
+          this.log(message);
         });
         this.isRegistered = true;
         if (this.loggedInUserItem) {
-          this.messages.push(`SignalR started for user ${this.loggedInUserItem.userName}.`)
+          this.log(`SignalR started for user ${this.loggedInUserItem.userName}.`)
         }
       }, err => {
-        if (err instanceof HttpErrorResponse) {
-          this.logError(err);
-        } else {
-          this.logMessage(`Error: ${err.message}.`);
-        }
+        this.log(err);
       });
     } else {
-      this.logMessage('loggedInUserItem was undefined, can not regiester.');
+      this.log('loggedInUserItem was undefined, can not regiester.');
     }
   }
 
   seedDatabase(): void {
     this._usersService.seedDatabase().subscribe(results => {
       this.isDatabaseSeeded = true;
-      this.users = results;
-      this.logMessage('Database seeded')
+      this.users = _.sortBy(results, ['userName']);
+      this.log('Database seeded, users loaded.')
     }, err => {
       this.isDatabaseSeeded = false;
       this.users = [];
-      this.logError(err);
+      this.log(err);
     });
   }
 
@@ -65,35 +61,34 @@ export class AppComponent {
       let userItem = _.find(this.users, u => u.userName === userName);
       if (userItem) {
         this.loggedInUserItem = userItem;
-        this.logMessage(`${userItem.userName} logged in.`);
+        this.log(`${userItem.userName} logged in.`);
       }
     }, err => {
       this.isLoggedIn = false;
       this.loggedInUserItem = undefined;
-      this.logError(err);
+      this.log(err);
     });
   }
 
   sendToAllUsers(message: string): void {
-    this._signalRService.sendToAllUsers(message).subscribe(() => {}, 
-    err => {
-      this.logError(err);
-    });
+    this._signalRService.sendToAllUsers(message).subscribe(() => { },
+      err => {
+        this.log(err);
+      });
   }
 
   sendToUser(message: string, userId: string): void {
-    this._signalRService.sendToUser(message, userId).subscribe(() => {},
-    err => {
-      this.logError(err);
-    });
+    this._signalRService.sendToUser(message, userId).subscribe(() => { },
+      err => {
+        this.log(err);
+      });
   }
 
-  private logError(err: HttpErrorResponse): void {
-    this.messages.push(`Error: ${err.message}`);
+  private log(content: any) {
+    if (content instanceof HttpErrorResponse || content instanceof Error) {
+      this.messages.push(`Error: ${content.message}`);
+    } else {
+      this.messages.push(content);
+    }
   }
-
-  private logMessage(message: string) {
-    this.messages.push(message);
-  }
-
 }

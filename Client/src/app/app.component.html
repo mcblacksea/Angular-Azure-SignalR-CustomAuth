@@ -1,5 +1,5 @@
 <div class="spacer">
-    <span>Seed Database - Run Once For All Browser Instances</span>
+    <span>Seed Database - Load Users</span>
     <button [disabled]="isDatabaseSeeded"
         (click)="seedDatabase()">Seed Database</button>
 </div>
@@ -34,9 +34,9 @@
 
 <div *ngIf="isLoggedIn">
     <div class="spacer">
-        <span>Register Yourself - Start SignalR Client</span>
+        <span>Get SignalR JWT - Start SignalR Client Hub</span>
         <button [disabled]="isRegistered"
-            (click)="registerUser()">Register Yourself</button>
+            (click)="startSignalRClient()">Start SignalR Client</button>
     </div>
 </div>
 <div *ngIf="isRegistered">
