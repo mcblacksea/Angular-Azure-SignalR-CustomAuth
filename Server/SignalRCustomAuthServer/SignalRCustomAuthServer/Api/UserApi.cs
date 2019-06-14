@@ -49,14 +49,18 @@ namespace SignalRCustomAuthServer.Api {
                 var requestBodyJson = sr.ReadToEnd();
                 var userLoginModel = JsonConvert.DeserializeObject<UserLoginModel>(requestBodyJson);
                 if (!userLoginModel.IsValid()) {
+                    log.LogWarning($"Login failed due to invalid data.");
                     return new BadRequestObjectResult("Invalid data, one or more values was empty.");
                 }
                 var userEntity = await GetUserEntityByUserName(userCloudTable, userLoginModel.UserName);
                 if (userEntity == null) {
+                    log.LogWarning($"Login attempt failed for {userLoginModel.UserName}, user not in database.");
                     return new UnauthorizedResult();
                 }
 
-                if (userLoginModel.UserName == userEntity.UserName && PasswordHashing.VerifyHashedPassword(userEntity.PasswordHash, userLoginModel.Password)) {
+                if (userLoginModel.UserName.Equals(userEntity.UserName, StringComparison.OrdinalIgnoreCase) 
+                    && PasswordHashing.VerifyHashedPassword(userEntity.PasswordHash, userLoginModel.Password)) {
+
                     var jwtTools = new JwtTools();
 
                     var subject = new ClaimsIdentity(new[] {
@@ -70,6 +74,7 @@ namespace SignalRCustomAuthServer.Api {
 
                     var tokenItemModel = new TokenItemModel { Token = token };
 
+                    log.LogWarning($"Login sucessful for {userLoginModel.UserName}.");
                     return new OkObjectResult(tokenItemModel);
                 }
 
