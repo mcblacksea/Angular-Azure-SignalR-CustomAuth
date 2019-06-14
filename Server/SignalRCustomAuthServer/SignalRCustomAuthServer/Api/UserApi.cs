@@ -33,15 +33,6 @@ namespace SignalRCustomAuthServer.Api {
             return null;
         }
 
-        static async Task<UserEntity> GeUserEntityById(CloudTable userCloudTable, String userId) {
-            var findOperation = TableOperation.Retrieve<UserEntity>(Global.UserPartitionKey, userId);
-            var findResult = await userCloudTable.ExecuteAsync(findOperation);
-            if (findResult.Result == null) {
-                return null;
-            }
-            return (UserEntity)findResult.Result;
-        }
-
         static UserEntity MakeUserEntity(String userName, String password, String id) {
             var userCreateModel = new UserCreateModel { UserName = userName, Password = password, Id = id };
             return userCreateModel.ToUserEntity();
@@ -53,7 +44,7 @@ namespace SignalRCustomAuthServer.Api {
          [Table(Global.UserTableName, Connection = "AzureWebJobsStorage")] CloudTable userCloudTable,
          ILogger log) {
             using (var sr = new StreamReader(req.Body)) {
-                var requestBodyJson = await sr.ReadToEndAsync();
+                var requestBodyJson = sr.ReadToEnd();
                 var userLoginModel = JsonConvert.DeserializeObject<UserLoginModel>(requestBodyJson);
                 if (!userLoginModel.IsValid()) {
                     return new BadRequestObjectResult("Invalid data, one or more values was empty.");
@@ -168,6 +159,21 @@ namespace SignalRCustomAuthServer.Api {
             }
         }
 
+        /// <summary>
+        /// Utilizes an output binding to create the SignalRConnection by reading the request header Authorization JWT and adsigning the UserId in the JWT to the SignalRConnection UserId property.
+        /// </summary>
+        /// <remarks>
+        /// <para>The below IBinder is an output binding that returns a SignalRConnectionInfo to the caller.</para>
+        /// <para>The reason for this output binding is because the input binder that uses the SignalRConnectionInfoAttribute, requires that the UserId be set as seen below:</para>
+        /// <para>Input Binding [SignalRConnectionInfo(HubName = SignalRHubName, UserId = "{headers.x-ms-client-principal-id}")] SignalRConnectionInfo connectionInfo,</para>
+        /// <para>Notice how the UserId is set from an http header value.  This can be considered a security risk so we want to avoid this if possible.</para>
+        /// <para>This output binding creates the SignalRConnectionInfo internally and setting the UserId to the UserId inside the Authentication JWT token.</para>
+        /// <para>The two below posts and code examples along with Anthony Chu's guidance make this feature possible.</para>
+        /// <para>https://gist.github.com/ErikAndreas/72c94a0c8a9e6e632f44522c41be8ee7 </para>
+        /// <para>http://dontcodetired.com/blog/post/Dynamic-Binding-in-Azure-Functions-with-Imperative-Runtime-Bindings </para>
+        /// <para>The GateKeeper validates the Authentication token. Yes there is some ceremony code for each method, but I prefer to be in control and the code is simple.</para>
+        /// <para>Ben Morris has published an alturnative solution using an input binding to perform the validation, this solution has much less ceremony code. https://www.ben-morris.com/custom-token-authentication-in-azure-functions-using-bindings/</para>
+        /// </remarks>
         [FunctionName(nameof(SignalRConnection))]
         public static IActionResult SignalRConnection(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,

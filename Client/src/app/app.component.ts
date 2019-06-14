@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { SignalRService } from './signalr-service';
 import { UsersService } from './users.service';
 import { UserItem } from './UserItem';

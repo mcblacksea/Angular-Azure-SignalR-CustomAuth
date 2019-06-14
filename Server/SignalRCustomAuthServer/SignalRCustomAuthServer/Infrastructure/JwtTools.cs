@@ -43,6 +43,11 @@
             return tokenModel;
         }
 
+        /// <summary>
+        /// <para>WARNING - all callers of this method MUST be wrapped in a try / catch block!</para>
+        /// <para>Interally this method invokes the JwtSecurityTokenHandler.ValidateToken which throws a different exception for any validatation failures, making it very easy to understand why the validation failed.</para>
+        /// <para>See https://docs.microsoft.com/en-us/dotnet/api/system.identitymodel.tokens.jwt.jwtsecuritytokenhandler.validatetoken?view=azure-dotnet for complete listing of thown exceptions.</para>
+        /// </summary>
         public ClaimsPrincipal ValidateToken(String issuer, String audience, String signingKey, String accessToken) {
             var validationParameters =
                 new TokenValidationParameters {

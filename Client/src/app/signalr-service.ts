@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { HubConnection } from '@aspnet/signalr';
 import * as signalR from '@aspnet/signalr';
-import { Observable } from "rxjs";
+import { HubConnection } from '@aspnet/signalr';
 import { SignalRConnectionInfo } from "./SignalRConnectionInfo";
-import { Subject } from "rxjs";
+import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +41,7 @@ export class SignalRService {
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
-    this.hubConnection.serverTimeoutInMilliseconds = 300000;
+    this.hubConnection.serverTimeoutInMilliseconds = 300000;  // five minutes
 
     this.hubConnection.start()
       .then(() => {
@@ -57,11 +57,15 @@ export class SignalRService {
     });
 
     this.hubConnection.onclose((error) => {
+      // FYI:  this will be invoked when the serverTimeoutInMilliseconds is reached without any activity.
+      // 
+      // TODO don't like how this works, need much more robust code
+      // I think this will be application dependent. 
+      // Each app will probably handle signalR connection issues differently 
+      //   along with the user experience and affect on the app without signalR
       if (this.hubConnection) {
         this.hubConnection.start();
       }
-
-      // TODO don't like how this works, need much more robust code
       console.error(`Something went wrong: ${error}`);
     });
   }
