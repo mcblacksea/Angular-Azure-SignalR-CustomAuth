@@ -1,6 +1,17 @@
 {
   "name": "signalr-angular-client",
   "version": "1.0.0",
+  "description": "Angular 7 client application consuming Azure Functions and SignalR, uses custom authentication for function endpoints.",
+  "author": "Karl Shifflett",
+  "license": "MIT",
+  "homepage": "https://github.com/Oceanware/Angular-Azure-SignalR-CustomAuth/blob/master/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Oceanware/Angular-Azure-SignalR-CustomAuth"
+  },
+  "bugs": {
+    "url": "https://github.com/Oceanware/Angular-Azure-SignalR-CustomAuth/issues"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve -o",
