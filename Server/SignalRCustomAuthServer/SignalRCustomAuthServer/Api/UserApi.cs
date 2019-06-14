@@ -74,7 +74,7 @@ namespace SignalRCustomAuthServer.Api {
 
                     var tokenItemModel = new TokenItemModel { Token = token };
 
-                    log.LogWarning($"Login sucessful for {userLoginModel.UserName}.");
+                    log.LogInformation($"Login sucessful for {userLoginModel.UserName}.");
                     return new OkObjectResult(tokenItemModel);
                 }
 
