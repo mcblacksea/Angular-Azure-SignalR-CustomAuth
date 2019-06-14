@@ -20,11 +20,9 @@
     <span>Login</span>
     <input [disabled]="isLoggedIn"
         #userName
-        value="John"
         placeholder="user name">
     <input [disabled]="isLoggedIn"
         #password
-        value="john"
         placeholder="password">
     <button [disabled]="isRegistered"
         (click)="login(userName.value, password.value)">Login</button>
