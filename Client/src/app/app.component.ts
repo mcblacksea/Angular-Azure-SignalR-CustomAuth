@@ -14,7 +14,7 @@ export class AppComponent {
 
   loggedInUserItem: UserItem | undefined;
   messages: string[] = [];
-  isRegistered: boolean = false;
+  isConnected: boolean = false;
   isDatabaseSeeded: boolean = false;
   isLoggedIn: boolean = false;
   users: UserItem[] = [];
@@ -30,7 +30,7 @@ export class AppComponent {
         this._signalRService.messages.subscribe(message => {
           this.log(message);
         });
-        this.isRegistered = true;
+        this.isConnected = true;
         if (this.loggedInUserItem) {
           this.log(`SignalR started for user ${this.loggedInUserItem.userName}.`)
         }

@@ -24,7 +24,7 @@
     <input [disabled]="isLoggedIn"
         #password
         placeholder="password">
-    <button [disabled]="isRegistered"
+    <button [disabled]="isLoggedIn"
         (click)="login(userName.value, password.value)">Login</button>
 </div>
 
@@ -33,11 +33,11 @@
 <div *ngIf="isLoggedIn">
     <div class="spacer">
         <span>Get SignalR JWT - Start SignalR Client Hub</span>
-        <button [disabled]="isRegistered"
+        <button [disabled]="isConnected"
             (click)="startSignalRClient()">Start SignalR Client</button>
     </div>
 </div>
-<div *ngIf="isRegistered">
+<div *ngIf="isConnected">
     <div class="spacer">
         <span>Send Message To All Users</span>
         <input #message
@@ -55,7 +55,8 @@
         </select>
         <input #messageForUserName
             placeholder="enter message">
-        <button (click)="sendToUser(messageForUserName.value, sendToUserName.value)">Send Message</button>
+        <button 
+        (click)="sendToUser(messageForUserName.value, sendToUserName.value)">Send Message</button>
     </div>
 </div>
 
