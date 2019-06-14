@@ -62,7 +62,7 @@ namespace SignalRCustomAuthServer.Api {
                             new Claim("userid", userEntity.RowKey)
                         });
 
-                    var utcExpiresDateTime = DateTime.UtcNow.AddHours(4);
+                    var utcExpiresDateTime = DateTime.UtcNow.AddHours(4);  // you can change this to meet your requirements for token expiration.
 
                     var token = jwtTools.CreateToken(Global.Issuer, Global.Audience, subject, utcExpiresDateTime, Global.EncryptionKey);
 
