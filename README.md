@@ -16,6 +16,8 @@ I learned a lot from these posts:
 
 - [Dynamic Binding in Azure Functions with Imperative Bindings](http://dontcodetired.com/blog/post/Dynamic-Binding-in-Azure-Functions-with-Imperative-Runtime-Bindings)
 
+- [Ben Morris Custom Token Authentication In Azure Functions](https://www.ben-morris.com/custom-token-authentication-in-azure-functions-using-bindings/)
+
 Some of the above posts were authored before the latest SignalR client NuGet packages came out. This app reflects Angular 7 and the newer SignalR NuGet packages published by Microsoft in Feb 2019.
 
 ## Prerequisites
@@ -26,17 +28,29 @@ Some of the above posts were authored before the latest SignalR client NuGet pac
 ## Training Video
 Please watch my YouTube Video Series Angular 7 - Azure Functions - SignalR - Custom Authorization
 
-1. Azure SignalR, Source Code Installing, Configuring, and Running The Applications
-2. Seeding Database
-3. Logging In
-4. Geting SignalR JWT and Start Client SignalR Hub
-5. Sending Messages
-6. Deep Dive - SignalRConnection & IBinder Output Binding
-7. Deep Dive - Custom Authorization - Gatekeeper - Token Tools
+[Playlist For Angular Azure SignalR Custom Authentication](https://www.youtube.com/playlist?list=PLFZfBw9eNzgzojmcvLlO0a0gw-n6sdInd)
+
+[1. Azure SignalR, Source Code Installing, Configuring, and Running The Applications](https://www.youtube.com/watch?v=YXUAfI0gMXo&feature=youtu.be)
+
+[2.Seeding The Database](https://www.youtube.com/watch?v=i31Ugbu6QXc&feature=youtu.be)
+
+[3. Logging Into Azure Application Using Custom Authentication](https://www.youtube.com/watch?v=e3Fg1I3KZKM&feature=youtu.be)
+
+[4. Getting A SignalR JWT and Start Client SignalR Hub](https://www.youtube.com/watch?v=VW7VzlzLDG4&feature=youtu.be)
+
+[5. Sending SignalR Messages To One Or More Client Applications](https://www.youtube.com/watch?v=OWMBQ-nBrQI&feature=youtu.be)
+
+[6. Deep Dive - SignalRConnectionInfo & IBinder Output Binding](https://www.youtube.com/watch?v=eOnrsdL33Fw&feature=youtu.be)
+
+[7. Deep Dive - Custom Authentication - Gatekeeper - Token Tools](https://www.youtube.com/watch?v=wrynKZe_qUU&feature=youtu.be)
 
 ## Let's Get Started
 
 ### Create Azure SignalR Service
+
+[What is Azure SignalR Service?](https://docs.microsoft.com/en-us/azure/azure-signalr/signalr-overview)
+
+[Create an Azure SignalR Service Instance](https://docs.microsoft.com/en-us/azure/azure-signalr/signalr-quickstart-azure-functions-csharp)
 
 1. Create an Azure SignalR Service instance in the Azure Portal. Go to Keys and note the connection string, you'll need this later.
 
