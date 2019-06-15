@@ -82,11 +82,13 @@ Please watch my YouTube Video Series Angular 7 - Azure Functions - SignalR - Cus
 ### Angular Client (Client) App
 Note: Please watch the above YouTube video if you have not watched it.
 
-1. From the Client folder, run npm install, this will install all dependencies.
-2. Run ng serve, this will start a local test server and open your default browser open http://localhost:4200.
-3. Open a second or more browser windows and navigate to http://localhost:4200.
-4. Using the UI:
-- Seed The Database
-- Login
-- Start SignalR Client
-- Start sending messages to all user or to an individual user.
+- From the Client folder, run npm install, this will install all dependencies.
+- Run ng serve, this will start a local test server and open your default browser open http://localhost:4200.
+- Open a second or more browser windows and navigate to http://localhost:4200.
+- Using the UI:
+  1. Seed The Database
+  2. Login
+  3. Start SignalR Client
+  4. Start sending messages to all user or to an individual user.
+
+![](application.png)
