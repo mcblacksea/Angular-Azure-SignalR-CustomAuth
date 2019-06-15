@@ -4,19 +4,11 @@
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Text;
-    using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.IdentityModel.Tokens;
-    using Newtonsoft.Json;
-    using SignalRCustomAuthServer.Model;
 
     public class JwtTools {
 
         public JwtTools() {
-        }
-
-        String FromBase64ToString(String part) {
-            var bytes = WebEncoders.Base64UrlDecode(part);
-            return Encoding.UTF8.GetString(bytes);
         }
 
         public String CreateToken(String issuer, String audience, ClaimsIdentity subject, DateTime utcExpires, String signingKey) {
@@ -30,17 +22,6 @@
                 expires: utcExpires,
                 signingCredentials: credentials);
             return jwtTokenHandler.WriteToken(token);
-        }
-
-        public TokenModel ParseToken(String token) {
-            var parts = token.Split(".");
-            //var headerJson = FromBase64ToString(parts[0]);
-            var payloadJson = FromBase64ToString(parts[1]);
-            //var signatureJson = FromBase64ToString(parts[2]);
-
-            var tokenModel = JsonConvert.DeserializeObject<TokenModel>(payloadJson);
-
-            return tokenModel;
         }
 
         /// <summary>

@@ -24,7 +24,7 @@
                         return new ValidateTokenResult(ex);
                     }
 
-                    var tokenModel = jwtTools.ParseToken(token);
+                    var tokenModel = TokenModel.CreateFromClaims(claimsPrincipal.Claims);
                     return new ValidateTokenResult(tokenModel);
                 }
                 return new ValidateTokenResult(new InvalidOperationException("Bearer missing"));

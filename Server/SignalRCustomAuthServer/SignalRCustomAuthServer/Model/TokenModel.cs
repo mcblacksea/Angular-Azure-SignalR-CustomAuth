@@ -1,11 +1,10 @@
 ﻿namespace SignalRCustomAuthServer.Model {
 
     using System;
-    using Newtonsoft.Json;
+    using System.Collections.Generic;
+    using System.Security.Claims;
 
     public class TokenModel {
-
-        [JsonProperty("aud")]
         public String Audience { get; set; }
 
         public DateTime Expires {
@@ -14,16 +13,43 @@
             }
         }
 
-        [JsonProperty("exp")]
         public Int64 ExpiresSeconds { get; set; }
-
-        [JsonProperty("userid")]
+        public String Issuer { get; set; }
         public String UserId { get; set; }
-
-        [JsonProperty("unique_name")]
         public String UserName { get; set; }
 
         public TokenModel() {
+        }
+
+        public static TokenModel CreateFromClaims(IEnumerable<Claim> claims) {
+            var tokenModel = new TokenModel();
+            foreach (var claim in claims) {
+                switch (claim.Type) {
+                    case "username":
+                        tokenModel.UserName = claim.Value;
+                        break;
+
+                    case "userid":
+                        tokenModel.UserId = claim.Value;
+                        break;
+
+                    case "exp":
+                        tokenModel.ExpiresSeconds = Convert.ToInt64(claim.Value);
+                        break;
+
+                    case "aud":
+                        tokenModel.Audience = claim.Value;
+                        break;
+
+                    case "iss":
+                        tokenModel.Issuer = claim.Value;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return tokenModel;
         }
     }
 }

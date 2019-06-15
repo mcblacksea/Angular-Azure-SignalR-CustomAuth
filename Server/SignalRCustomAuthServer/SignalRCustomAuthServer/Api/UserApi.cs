@@ -64,7 +64,7 @@ namespace SignalRCustomAuthServer.Api {
                     var jwtTools = new JwtTools();
 
                     var subject = new ClaimsIdentity(new[] {
-                            new Claim(ClaimTypes.Name, userEntity.UserName),
+                            new Claim("username", userEntity.UserName),
                             new Claim("userid", userEntity.RowKey)
                         });
 
