@@ -25,8 +25,8 @@ Some of the above posts were authored before the latest SignalR client NuGet pac
 
 - Client Application: Standard Angular 7 tooling setup, editor of your choice.
 
-## Training Video
-Please watch my YouTube Video Series Angular 7 - Azure Functions - SignalR - Custom Authorization
+## Training Videos
+Please watch my YouTube Video Series Angular 7 - Azure Functions - SignalR - Custom Authorization.  You can open the playlist or view the videos individually.
 
 [Playlist For Angular Azure SignalR Custom Authentication](https://www.youtube.com/playlist?list=PLFZfBw9eNzgzojmcvLlO0a0gw-n6sdInd)
 
