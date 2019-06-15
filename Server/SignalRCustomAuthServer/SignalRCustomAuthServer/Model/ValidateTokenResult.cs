@@ -5,6 +5,7 @@
     public class ValidateTokenResult {
         public Exception Exception { get; }
         public TokenModel TokenModel { get; }
+        public Boolean Unauthorized { get { return this.Exception != null; } }
 
         public ValidateTokenResult(TokenModel tokenModel) {
             this.TokenModel = tokenModel;

@@ -18,7 +18,7 @@ namespace SignalRCustomAuthServer.Api {
     using SignalRCustomAuthServer.Model;
 
     public static class UserApi {
-        
+
         // in a real world app using Table Storage with thousands of users, create a second table that maps a userName to the full user entity table.
         // or, use CosmosDB which supports multiple indexes.
         static async Task<UserEntity> GetUserEntityByUserName(CloudTable userCloudTable, String userName) {
@@ -58,9 +58,8 @@ namespace SignalRCustomAuthServer.Api {
                     return new UnauthorizedResult();
                 }
 
-                if (userLoginModel.UserName.Equals(userEntity.UserName, StringComparison.OrdinalIgnoreCase) 
+                if (userLoginModel.UserName.Equals(userEntity.UserName, StringComparison.OrdinalIgnoreCase)
                     && PasswordHashing.VerifyHashedPassword(userEntity.PasswordHash, userLoginModel.Password)) {
-
                     var jwtTools = new JwtTools();
 
                     var subject = new ClaimsIdentity(new[] {
@@ -88,7 +87,6 @@ namespace SignalRCustomAuthServer.Api {
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
             [Table(Global.UserTableName, Connection = "AzureWebJobsStorage")] CloudTable userCloudTable,
             ILogger log) {
-
             var userItemModels = new List<UserItemModel>();
 
             TableContinuationToken continuationToken = null;
@@ -100,7 +98,7 @@ namespace SignalRCustomAuthServer.Api {
                 }
                 return new OkObjectResult(userItemModels);
             }
-            
+
             // database is empty - now seed it
 
             var userA = MakeUserEntity("John", "john", "56bc6a96-d6dc-406e-b36f-46373936c3bd");
@@ -113,7 +111,7 @@ namespace SignalRCustomAuthServer.Api {
             batchOperation.InsertOrReplace(userC);
 
             var results = await userCloudTable.ExecuteBatchAsync(batchOperation);
-            
+
             foreach (var result in results) {
                 if (result.Result is UserEntity userEntity) {
                     userItemModels.Add(userEntity.ToUserItemModel());
@@ -130,23 +128,23 @@ namespace SignalRCustomAuthServer.Api {
             [SignalR(HubName = Global.SignalRHubName)]IAsyncCollector<SignalRMessage> signalRMessages,
             ILogger log) {
             var gateKeeperResult = GateKeeper.ValidateToken(req.Headers);
-            if (gateKeeperResult.IsValid()) {
-                using (var sr = new StreamReader(req.Body)) {
-                    var message = sr.ReadToEnd();
-
-                    log.LogInformation($"Sending, {message} to all users.");
-
-                    await signalRMessages.AddAsync(
-                        new SignalRMessage {
-                            Target = Global.MessageTarget,
-                            Arguments = new[] { message }
-                        });
-
-                    return new OkResult();
-                }
-            } else {
+            if (gateKeeperResult.Unauthorized) {
                 log.LogError(gateKeeperResult.Exception, gateKeeperResult.LogMessage());
                 return new UnauthorizedResult();
+            }
+
+            using (var sr = new StreamReader(req.Body)) {
+                var message = sr.ReadToEnd();
+
+                log.LogInformation($"Sending, {message} to all users.");
+
+                await signalRMessages.AddAsync(
+                    new SignalRMessage {
+                        Target = Global.MessageTarget,
+                        Arguments = new[] { message }
+                    });
+
+                return new OkResult();
             }
         }
 
@@ -158,24 +156,24 @@ namespace SignalRCustomAuthServer.Api {
             String userId
             ) {
             var gateKeeperResult = GateKeeper.ValidateToken(req.Headers);
-            if (gateKeeperResult.IsValid()) {
-                using (var sr = new StreamReader(req.Body)) {
-                    var message = sr.ReadToEnd();
-
-                    log.LogInformation($"Sending, {message} to {userId} only.");
-
-                    await signalRMessages.AddAsync(
-                        new SignalRMessage {
-                            UserId = userId,
-                            Target = Global.MessageTarget,
-                            Arguments = new[] { message }
-                        });
-
-                    return new OkResult();
-                }
-            } else {
+            if (gateKeeperResult.Unauthorized) {
                 log.LogError(gateKeeperResult.Exception, gateKeeperResult.LogMessage());
                 return new UnauthorizedResult();
+            }
+
+            using (var sr = new StreamReader(req.Body)) {
+                var message = sr.ReadToEnd();
+
+                log.LogInformation($"Sending, {message} to {userId} only.");
+
+                await signalRMessages.AddAsync(
+                    new SignalRMessage {
+                        UserId = userId,
+                        Target = Global.MessageTarget,
+                        Arguments = new[] { message }
+                    });
+
+                return new OkResult();
             }
         }
 
@@ -201,13 +199,13 @@ namespace SignalRCustomAuthServer.Api {
             IBinder binder,
             ILogger log) {
             var gateKeeperResult = GateKeeper.ValidateToken(req.Headers);
-            if (gateKeeperResult.IsValid()) {
-                var connectionInfo = binder.Bind<SignalRConnectionInfo>(new SignalRConnectionInfoAttribute { HubName = Global.SignalRHubName, UserId = gateKeeperResult.TokenModel.UserId });
-                return new OkObjectResult(connectionInfo);
-            } else {
+            if (gateKeeperResult.Unauthorized) {
                 log.LogError(gateKeeperResult.Exception, gateKeeperResult.LogMessage());
                 return new UnauthorizedResult();
             }
+
+            var connectionInfo = binder.Bind<SignalRConnectionInfo>(new SignalRConnectionInfoAttribute { HubName = Global.SignalRHubName, UserId = gateKeeperResult.TokenModel.UserId });
+            return new OkObjectResult(connectionInfo);
         }
     }
 }
