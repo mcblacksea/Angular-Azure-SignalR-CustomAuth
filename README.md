@@ -32,7 +32,7 @@ Please watch my YouTube Video Series Angular 7 - Azure Functions - SignalR - Cus
 
 [1. Azure SignalR, Source Code Installing, Configuring, and Running The Applications](https://www.youtube.com/watch?v=YXUAfI0gMXo&feature=youtu.be)
 
-[2.Seeding The Database](https://www.youtube.com/watch?v=i31Ugbu6QXc&feature=youtu.be)
+[2, Seeding The Database](https://www.youtube.com/watch?v=i31Ugbu6QXc&feature=youtu.be)
 
 [3. Logging Into Azure Application Using Custom Authentication](https://www.youtube.com/watch?v=e3Fg1I3KZKM&feature=youtu.be)
 
