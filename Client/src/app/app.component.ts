@@ -12,13 +12,13 @@ import * as _ from 'lodash';
 })
 export class AppComponent {
 
+  private _token: string = '';
   loggedInUserItem: UserItem | undefined;
   messages: string[] = [];
   isConnected: boolean = false;
   isDatabaseSeeded: boolean = false;
   isLoggedIn: boolean = false;
   users: UserItem[] = [];
-  private _token: string = '';
 
   constructor(private _signalRService: SignalRService, private _usersService: UsersService) { }
 
@@ -32,7 +32,7 @@ export class AppComponent {
         });
         this.isConnected = true;
         if (this.loggedInUserItem) {
-          this.log(`SignalR started for user ${this.loggedInUserItem.userName}.`)
+          this.log(`SignalR started for user ${this.loggedInUserItem.userName}.`);
         }
       }, err => {
         this.log(err);
@@ -46,7 +46,7 @@ export class AppComponent {
     this._usersService.seedDatabase().subscribe(results => {
       this.isDatabaseSeeded = true;
       this.users = _.sortBy(results, ['userName']);
-      this.log('Database seeded, users loaded.')
+      this.log('Database seeded, users loaded.');
     }, err => {
       this.isDatabaseSeeded = false;
       this.users = [];
@@ -58,7 +58,7 @@ export class AppComponent {
     this._usersService.login(userName, password).subscribe(tokenItem => {
       this.isLoggedIn = true;
       this._token = tokenItem.token;
-      let userItem = _.find(this.users, u => u.userName.toLowerCase() === userName.toLowerCase());
+      const userItem = _.find(this.users, u => u.userName.toLowerCase() === userName.toLowerCase());
       if (userItem) {
         this.loggedInUserItem = userItem;
         this.log(`${userItem.userName} logged in.`);

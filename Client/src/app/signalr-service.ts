@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as signalR from '@aspnet/signalr';
 import { HubConnection } from '@aspnet/signalr';
-import { SignalRConnectionInfo } from "./SignalRConnectionInfo";
+import { SignalRConnectionInfo } from './SignalRConnectionInfo';
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
@@ -12,7 +12,7 @@ import { Subject } from 'rxjs';
 export class SignalRService {
 
   private _token: string = '';
-  private readonly _baseUrl: string = "http://localhost:7071/api/";
+  private readonly _baseUrl: string = 'http://localhost:7071/api/';
   private hubConnection: HubConnection | undefined;
   messages: Subject<string> = new Subject();
 
@@ -20,17 +20,17 @@ export class SignalRService {
 
   getSignalRConnectionInfo(token: string): Observable<SignalRConnectionInfo> {
     this._token = token;
-    let requestUrl: string = `${this._baseUrl}SignalRConnection`;
+    const requestUrl: string = `${this._baseUrl}SignalRConnection`;
 
     return this._httpClient.get<SignalRConnectionInfo>(
       requestUrl, {
-        headers: new HttpHeaders({ 'Authorization': `Bearer ${this._token}` })
+        headers: new HttpHeaders({ Authorization: `Bearer ${this._token}` })
       });
   }
 
   init(signalRConnectionInfo: SignalRConnectionInfo): void {
 
-    let options: signalR.IHttpConnectionOptions = {
+    const options: signalR.IHttpConnectionOptions = {
       accessTokenFactory: () => signalRConnectionInfo.accessToken
     };
 
@@ -58,10 +58,10 @@ export class SignalRService {
 
     this.hubConnection.onclose((error) => {
       // FYI:  this will be invoked when the serverTimeoutInMilliseconds is reached without any activity.
-      // 
+      //
       // TODO don't like how this works, need much more robust code
-      // I think this will be application dependent. 
-      // Each app will probably handle signalR connection issues differently 
+      // I think this will be application dependent.
+      // Each app will probably handle signalR connection issues differently
       //   along with the user experience and affect on the app without signalR
       if (this.hubConnection) {
         this.hubConnection.start();
@@ -71,26 +71,26 @@ export class SignalRService {
   }
 
   sendToAllUsers(message: string): Observable<object> {
-    let requestUrl = `${this._baseUrl}SendMessageToAllUsers`;
+    const requestUrl = `${this._baseUrl}SendMessageToAllUsers`;
 
     message = 'Sent To All Users: '.concat(message);
 
     return this._httpClient.post(
       requestUrl,
       message, {
-        headers: new HttpHeaders({ "Authorization": `Bearer ${this._token}` })
+        headers: new HttpHeaders({ Authorization: `Bearer ${this._token}` })
       });
   }
 
   sendToUser(message: string, userId: string): Observable<object> {
-    let requestUrl = `${this._baseUrl}SendMessageToUser/${userId}`;
+    const requestUrl = `${this._baseUrl}SendMessageToUser/${userId}`;
 
     message = `Sent Only To ${userId}: `.concat(message);
 
     return this._httpClient.post(
       requestUrl,
       message, {
-        headers: new HttpHeaders({ "Authorization": `Bearer ${this._token}` })
+        headers: new HttpHeaders({ Authorization: `Bearer ${this._token}` })
       });
   }
 }
