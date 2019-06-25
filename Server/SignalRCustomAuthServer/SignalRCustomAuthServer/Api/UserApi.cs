@@ -214,7 +214,6 @@ namespace SignalRCustomAuthServer.Api {
         public static IActionResult SignalRConnectionNotAsSecure(
             [HttpTrigger(AuthorizationLevel.Anonymous, Global.HttpVerbGet, Route = null)] HttpRequest req,
             [SignalRConnectionInfo(HubName = Global.SignalRHubName, UserId = "{headers.x-ms-client-principal-id}")] SignalRConnectionInfo connectionInfo,
-            IBinder binder,
             ILogger log) {
             var validateTokenResult = GateKeeper.ValidateToken(req.Headers);
             if (validateTokenResult.Unauthorized) {
