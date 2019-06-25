@@ -34,7 +34,7 @@
     <div class="spacer">
         <span>Get SignalR JWT - Start SignalR Client Hub</span>
         <button [disabled]="isConnected"
-            (click)="startSignalRClient()">Start SignalR Client</button>
+            (click)="startSignalR()">Start SignalR Client</button>
     </div>
 </div>
 <div *ngIf="isConnected">
@@ -55,8 +55,7 @@
         </select>
         <input #messageForUserName
             placeholder="enter message">
-        <button 
-        (click)="sendToUser(messageForUserName.value, sendToUserName.value)">Send Message</button>
+        <button (click)="sendToUser(messageForUserName.value, sendToUserName.value)">Send Message</button>
     </div>
 </div>
 

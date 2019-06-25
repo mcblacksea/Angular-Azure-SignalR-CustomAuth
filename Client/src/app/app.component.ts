@@ -1,8 +1,9 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { SubSink } from 'subsink';
 import { SignalRService } from './signalr-service';
 import { UsersService } from './users.service';
-import { UserItem } from './UserItem';
-import { HttpErrorResponse } from '@angular/common/http';
+import { UserItem } from './user-item';
 import * as _ from 'lodash';
 
 @Component({
@@ -10,9 +11,10 @@ import * as _ from 'lodash';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
 
-  private _token: string = '';
+  private subs = new SubSink();
+  private token: string = '';
   loggedInUserItem: UserItem | undefined;
   messages: string[] = [];
   isConnected: boolean = false;
@@ -20,21 +22,23 @@ export class AppComponent {
   isLoggedIn: boolean = false;
   users: UserItem[] = [];
 
-  constructor(private _signalRService: SignalRService, private _usersService: UsersService) { }
+  constructor(private signalRService: SignalRService, private usersService: UsersService) {
+    this.subs.sink = signalRService.messageObservable$.subscribe(message => this.log(message));
+  }
 
-  startSignalRClient() {
-    if (this.loggedInUserItem && this._token) {
+  async ngOnDestroy() {
+    this.subs.unsubscribe();
+    await this.signalRService.stopSignalR();
+  }
 
-      this._signalRService.getSignalRConnectionInfo(this._token).subscribe(results => {
-        this._signalRService.init(results);
-        this._signalRService.messages.subscribe(message => {
-          this.log(message);
-        });
+  startSignalR() {
+    if (this.loggedInUserItem && this.token) {
+      this.signalRService.startSignalR(this.token).then(() => {
         this.isConnected = true;
         if (this.loggedInUserItem) {
           this.log(`SignalR started for user ${this.loggedInUserItem.userName}.`);
         }
-      }, err => {
+      }).catch(err => {
         this.log(err);
       });
     } else {
@@ -43,7 +47,7 @@ export class AppComponent {
   }
 
   seedDatabase(): void {
-    this._usersService.seedDatabase().subscribe(results => {
+    this.usersService.seedDatabase().subscribe(results => {
       this.isDatabaseSeeded = true;
       this.users = _.sortBy(results, ['userName']);
       this.log('Database seeded, users loaded.');
@@ -55,9 +59,9 @@ export class AppComponent {
   }
 
   login(userName: string, password: string): void {
-    this._usersService.login(userName, password).subscribe(tokenItem => {
+    this.usersService.login(userName, password).subscribe(tokenItem => {
       this.isLoggedIn = true;
-      this._token = tokenItem.token;
+      this.token = tokenItem.token;
       const userItem = _.find(this.users, u => u.userName.toLowerCase() === userName.toLowerCase());
       if (userItem) {
         this.loggedInUserItem = userItem;
@@ -71,14 +75,14 @@ export class AppComponent {
   }
 
   sendToAllUsers(message: string): void {
-    this._signalRService.sendToAllUsers(message).subscribe(() => { },
+    this.signalRService.sendToAllUsers(message).subscribe(() => { },
       err => {
         this.log(err);
       });
   }
 
   sendToUser(message: string, userId: string): void {
-    this._signalRService.sendToUser(message, userId).subscribe(() => { },
+    this.signalRService.sendToUser(message, userId).subscribe(() => { },
       err => {
         this.log(err);
       });

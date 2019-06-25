@@ -1,28 +1,28 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserItem } from './UserItem';
-import { TokenItem } from './TokenItem';
+import { UserItem } from './user-item';
+import { TokenItem } from './token-item';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  private readonly _baseUrl: string = 'http://localhost:7071/api/';
+  private readonly baseUrl: string = 'http://localhost:7071/api/';
 
-  constructor(private _httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) { }
 
-  seedDatabase(): Observable<Array<UserItem>> {
-    const requestUrl = `${this._baseUrl}SeedDatabase`;
-    return this._httpClient.get<Array<UserItem>>(requestUrl);
+  public seedDatabase(): Observable<Array<UserItem>> {
+    const requestUrl = `${this.baseUrl}SeedDatabase`;
+    return this.httpClient.get<Array<UserItem>>(requestUrl);
   }
 
-  login(userName: string, password: string): Observable<TokenItem> {
-    const requestUrl = `${this._baseUrl}Login`;
+  public login(userName: string, password: string): Observable<TokenItem> {
+    const requestUrl = `${this.baseUrl}Login`;
     const body = {
-      UserName: userName,
-      Password: password
+      userName: userName,
+      password: password
     };
-    return this._httpClient.post<TokenItem>(requestUrl, body);
+    return this.httpClient.post<TokenItem>(requestUrl, body);
   }
 }
