@@ -25,6 +25,13 @@ Some of the above posts were authored before the latest SignalR client NuGet pac
 
 - Client Application: Standard Angular 7 tooling setup, editor of your choice.
 
+## Refactoring - 6/24/2019
+I refactored the code to simplify and make it cleaner.  Of note is the Client signal-r.service.ts; it now uses async await to make the startSignalR method much easier to read and understand, since it now has top -> bottom flow.
+
+The app.component.ts now uses the SubSink package to unsubscribe from Subjects properly.
+
+I also removed all the magic strings from the Server app.
+
 ## Blog Post
 [Angular 7 Azure Functions SignalR Custom Authentication](https://oceanware.wordpress.com/2019/06/15/angular-7-azure-functions-signalr-custom-authenticaion/)
 
@@ -32,6 +39,8 @@ Some of the above posts were authored before the latest SignalR client NuGet pac
 Please watch my YouTube Video Series Angular 7 - Azure Functions - SignalR - Custom Authorization.  You can open the playlist or view the videos individually.
 
 [Playlist For Angular Azure SignalR Custom Authentication](https://www.youtube.com/playlist?list=PLFZfBw9eNzgzojmcvLlO0a0gw-n6sdInd)
+
+[0. Refactored Code - Cleaner Better - WATCH Me First](https://www.youtube.com/watch?v=BBH2pOuUDTw&feature=youtu.be)
 
 [1. Azure SignalR, Source Code Installing, Configuring, and Running The Applications](https://www.youtube.com/watch?v=YXUAfI0gMXo&feature=youtu.be)
 
