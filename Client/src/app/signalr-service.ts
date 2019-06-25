@@ -94,64 +94,6 @@ export class SignalRService {
     return;
   }
 
-
-
-
-
-
-
-  // getSignalRConnectionInfo(token: string): Observable<SignalRConnectionInfo> {
-  //   this.token = token;
-  //   const requestUrl: string = `${this.baseUrl}SignalRConnection`;
-
-  //   return this.httpClient.get<SignalRConnectionInfo>(
-  //     requestUrl, {
-  //       headers: new HttpHeaders({ Authorization: `Bearer ${this.token}` })
-  //     });
-  // }
-
-  // init(signalRConnectionInfo: SignalRConnectionInfo): void {
-
-  //   const options: signalR.IHttpConnectionOptions = {
-  //     accessTokenFactory: () => signalRConnectionInfo.accessToken
-  //   };
-
-  //   this.announceMessage('User registered with SignalR.');
-
-  //   this.hubConnection = new signalR.HubConnectionBuilder()
-  //     .withUrl(signalRConnectionInfo.url, options)
-  //     .configureLogging(signalR.LogLevel.Information)
-  //     .build();
-
-  //   this.hubConnection.serverTimeoutInMilliseconds = 300000;  // five minutes
-
-  //   this.hubConnection.start()
-  //     .then(() => {
-  //       this.announceMessage('Hub Connection Started.');
-  //     }).catch(
-  //       err => {
-  //         this.announceMessage(`Hub Unable To Start Connection. ${err.toString()}`);
-  //       }
-  //     );
-
-  //   this.hubConnection.on(global.messageTarget, (data: any) => {
-  //     this.announceMessage(data);
-  //   });
-
-  //   this.hubConnection.onclose((error) => {
-  //     // FYI:  this will be invoked when the serverTimeoutInMilliseconds is reached without any activity.
-  //     //
-  //     // TODO don't like how this works, need much more robust code
-  //     // I think this will be application dependent.
-  //     // Each app will probably handle signalR connection issues differently
-  //     //   along with the user experience and affect on the app without signalR
-  //     if (this.hubConnection) {
-  //       this.hubConnection.start();
-  //     }
-  //     console.error(`Something went wrong: ${error}`);
-  //   });
-  // }
-
   sendToAllUsers(message: string): Observable<object> {
     const requestUrl = `${this.baseUrl}SendMessageToAllUsers`;
 
