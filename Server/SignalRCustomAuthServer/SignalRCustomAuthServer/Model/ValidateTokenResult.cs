@@ -15,15 +15,11 @@
             this.Exception = exception;
         }
 
-        public Boolean IsValid() {
-            return this.TokenModel != null;
-        }
-
         public String LogMessage() {
             if (this.Exception != null) {
-                return $"{this.Exception.GetType().Name} was thrown while validating token.  Message: {this.Exception.Message}.";
+                return String.Format(GlobalMessages.ExceptionThownWhileValidatingTokenFormat, this.Exception.GetType().Name, this.Exception.Message);
             }
-            return $"Token for user name: {this.TokenModel.UserName} is valid";
+            return String.Format(GlobalMessages.TokenForUserNameIsValidFormat, this.TokenModel.UserName);
         }
     }
 }

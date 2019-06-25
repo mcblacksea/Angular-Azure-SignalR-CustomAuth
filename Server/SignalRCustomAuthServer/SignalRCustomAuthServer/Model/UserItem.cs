@@ -2,11 +2,11 @@
 
     using System;
 
-    public class UserItemModel {
+    public class UserItem {
         public String Id { get; set; }
         public String UserName { get; set; }
 
-        public UserItemModel() {
+        public UserItem() {
         }
     }
 }

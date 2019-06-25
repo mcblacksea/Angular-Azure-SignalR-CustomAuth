@@ -25,23 +25,23 @@
             var tokenModel = new TokenModel();
             foreach (var claim in claims) {
                 switch (claim.Type) {
-                    case "username":
+                    case Global.ClaimUserName:
                         tokenModel.UserName = claim.Value;
                         break;
 
-                    case "userid":
+                    case Global.ClaimUserId:
                         tokenModel.UserId = claim.Value;
                         break;
 
-                    case "exp":
+                    case Global.ClaimExpires:
                         tokenModel.ExpiresSeconds = Convert.ToInt64(claim.Value);
                         break;
 
-                    case "aud":
+                    case Global.ClaimAudience:
                         tokenModel.Audience = claim.Value;
                         break;
 
-                    case "iss":
+                    case Global.ClaimIssuer:
                         tokenModel.Issuer = claim.Value;
                         break;
 

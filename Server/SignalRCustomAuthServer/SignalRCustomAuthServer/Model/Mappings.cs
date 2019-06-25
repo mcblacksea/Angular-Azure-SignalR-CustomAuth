@@ -14,8 +14,8 @@
             };
         }
 
-        public static UserItemModel ToUserItemModel(this UserEntity userEntity) {
-            return new UserItemModel {
+        public static UserItem ToUserItem(this UserEntity userEntity) {
+            return new UserItem {
                 Id = userEntity.Id,
                 UserName = userEntity.UserName
             };

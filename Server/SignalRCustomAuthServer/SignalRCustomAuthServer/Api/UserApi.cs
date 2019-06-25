@@ -21,9 +21,10 @@ namespace SignalRCustomAuthServer.Api {
 
         // in a real world app using Table Storage with thousands of users, create a second table that maps a userName to the full user entity table.
         // or, use CosmosDB which supports multiple indexes.
+        // you should also have a TableService that abstracts all of its operations away from this class or any Azure Functions class.
         static async Task<UserEntity> GetUserEntityByUserName(CloudTable userCloudTable, String userName) {
-            var partitionKeyfilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, Global.UserPartitionKey);
-            var userNameFilter = TableQuery.GenerateFilterCondition("UserName", QueryComparisons.Equal, userName);
+            var partitionKeyfilter = TableQuery.GenerateFilterCondition(Global.PartitionKey, QueryComparisons.Equal, Global.UserPartitionKey);
+            var userNameFilter = TableQuery.GenerateFilterCondition(Global.UserName, QueryComparisons.Equal, userName);
             var combinedFilter = TableQuery.CombineFilters(partitionKeyfilter, TableOperators.And, userNameFilter);
             var tableQuery = new TableQuery<UserEntity>().Where(combinedFilter);
 
@@ -42,19 +43,19 @@ namespace SignalRCustomAuthServer.Api {
 
         [FunctionName(nameof(Login))]
         public static async Task<IActionResult> Login(
-         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-         [Table(Global.UserTableName, Connection = "AzureWebJobsStorage")] CloudTable userCloudTable,
+         [HttpTrigger(AuthorizationLevel.Anonymous, Global.HttpVerbPost, Route = null)] HttpRequest req,
+         [Table(Global.UserTableName, Connection = Global.AzureWebJobsStorage)] CloudTable userCloudTable,
          ILogger log) {
             using (var sr = new StreamReader(req.Body)) {
                 var requestBodyJson = sr.ReadToEnd();
                 var userLoginModel = JsonConvert.DeserializeObject<UserLoginModel>(requestBodyJson);
                 if (!userLoginModel.IsValid()) {
-                    log.LogWarning($"Login failed due to invalid data.");
-                    return new BadRequestObjectResult("Invalid data, one or more values was empty.");
+                    log.LogWarning(GlobalMessages.LoginFailedDueToInvalidData);
+                    return new BadRequestObjectResult(GlobalMessages.InvalidDataOneOrMoreValuesWasEmpty);
                 }
                 var userEntity = await GetUserEntityByUserName(userCloudTable, userLoginModel.UserName);
                 if (userEntity == null) {
-                    log.LogWarning($"Login attempt failed for {userLoginModel.UserName}, user not in database.");
+                    log.LogWarning(String.Format(GlobalMessages.LoginFailedUserNotInDatabaseFormat, userLoginModel.UserName));
                     return new UnauthorizedResult();
                 }
 
@@ -63,8 +64,8 @@ namespace SignalRCustomAuthServer.Api {
                     var jwtTools = new JwtTools();
 
                     var subject = new ClaimsIdentity(new[] {
-                            new Claim("username", userEntity.UserName),
-                            new Claim("userid", userEntity.RowKey)
+                            new Claim(Global.ClaimUserName, userEntity.UserName),
+                            new Claim(Global.ClaimUserId, userEntity.RowKey)
                         });
 
                     var utcExpiresDateTime = DateTime.UtcNow.AddHours(4);  // you can change this to meet your requirements for token expiration.
@@ -73,34 +74,33 @@ namespace SignalRCustomAuthServer.Api {
 
                     var tokenItemModel = new TokenItemModel { Token = token };
 
-                    log.LogInformation($"Login sucessful for {userLoginModel.UserName}.");
+                    log.LogInformation(String.Format(GlobalMessages.LoginSuccessfulFormat, userLoginModel.UserName));
                     return new OkObjectResult(tokenItemModel);
                 }
 
-                log.LogWarning($"Login failed for {userLoginModel.UserName} during login attempt.");
+                log.LogWarning(String.Format(GlobalMessages.LoginFailedFormat, userLoginModel.UserName));
                 return new UnauthorizedResult();
             }
         }
 
         [FunctionName(nameof(SeedDatabase))]
         public static async Task<IActionResult> SeedDatabase(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
-            [Table(Global.UserTableName, Connection = "AzureWebJobsStorage")] CloudTable userCloudTable,
+            [HttpTrigger(AuthorizationLevel.Anonymous, Global.HttpVerbGet, Route = null)] HttpRequest req,
+            [Table(Global.UserTableName, Connection = Global.AzureWebJobsStorage)] CloudTable userCloudTable,
             ILogger log) {
-            var userItemModels = new List<UserItemModel>();
+            var userItems = new List<UserItem>();
 
             TableContinuationToken continuationToken = null;
             var entities = await userCloudTable.ExecuteQuerySegmentedAsync<UserEntity>(new TableQuery<UserEntity>(), continuationToken);
             if (entities.Results.Count > 0) {
                 foreach (var userEntity in entities.Results) {
-                    userItemModels.Add(userEntity.ToUserItemModel());
-                    log.LogInformation($"User {userEntity.UserName} in database.");
+                    userItems.Add(userEntity.ToUserItem());
+                    log.LogInformation(String.Format(GlobalMessages.UserAlreadyInDatabaseFormat, userEntity.UserName));
                 }
-                return new OkObjectResult(userItemModels);
+                return new OkObjectResult(userItems);
             }
 
-            // database is empty - now seed it
-
+            // database is empty - now seed it, this simulates a live system with users.
             var userA = MakeUserEntity("John", "john", "56bc6a96-d6dc-406e-b36f-46373936c3bd");
             var userB = MakeUserEntity("Sue", "sue", "8f9b0fa5-4afe-4120-9e99-4f32148a79fc");
             var userC = MakeUserEntity("Tim", "tim", "197f8915-a37f-41d0-97da-5514d85966b5");
@@ -114,29 +114,29 @@ namespace SignalRCustomAuthServer.Api {
 
             foreach (var result in results) {
                 if (result.Result is UserEntity userEntity) {
-                    userItemModels.Add(userEntity.ToUserItemModel());
-                    log.LogInformation($"User {userEntity.UserName} added to database.");
+                    userItems.Add(userEntity.ToUserItem());
+                    log.LogInformation(String.Format(GlobalMessages.UserAddedToDatabaseFormat, userEntity.UserName));
                 }
             }
 
-            return new OkObjectResult(userItemModels);
+            return new OkObjectResult(userItems);
         }
 
         [FunctionName(nameof(SendMessageToAllUsers))]
         public static async Task<IActionResult> SendMessageToAllUsers(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, Global.HttpVerbPost, Route = null)]HttpRequest req,
             [SignalR(HubName = Global.SignalRHubName)]IAsyncCollector<SignalRMessage> signalRMessages,
             ILogger log) {
-            var gateKeeperResult = GateKeeper.ValidateToken(req.Headers);
-            if (gateKeeperResult.Unauthorized) {
-                log.LogError(gateKeeperResult.Exception, gateKeeperResult.LogMessage());
+            var validateTokenResult = GateKeeper.ValidateToken(req.Headers);
+            if (validateTokenResult.Unauthorized) {
+                log.LogError(validateTokenResult.Exception, validateTokenResult.LogMessage());
                 return new UnauthorizedResult();
             }
 
             using (var sr = new StreamReader(req.Body)) {
                 var message = sr.ReadToEnd();
 
-                log.LogInformation($"Sending, {message} to all users.");
+                log.LogInformation(String.Format(GlobalMessages.SendingMessageToAllUsersFormat, message));
 
                 await signalRMessages.AddAsync(
                     new SignalRMessage {
@@ -150,21 +150,21 @@ namespace SignalRCustomAuthServer.Api {
 
         [FunctionName(nameof(SendMessageToUser))]
         public static async Task<IActionResult> SendMessageToUser(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = nameof(SendMessageToUser) + "/{userId}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, Global.HttpVerbPost, Route = nameof(SendMessageToUser) + Global.UserIdQueryParam)] HttpRequest req,
             [SignalR(HubName = Global.SignalRHubName)]IAsyncCollector<SignalRMessage> signalRMessages,
             ILogger log,
             String userId
             ) {
-            var gateKeeperResult = GateKeeper.ValidateToken(req.Headers);
-            if (gateKeeperResult.Unauthorized) {
-                log.LogError(gateKeeperResult.Exception, gateKeeperResult.LogMessage());
+            var validateTokenResult = GateKeeper.ValidateToken(req.Headers);
+            if (validateTokenResult.Unauthorized) {
+                log.LogError(validateTokenResult.Exception, validateTokenResult.LogMessage());
                 return new UnauthorizedResult();
             }
 
             using (var sr = new StreamReader(req.Body)) {
                 var message = sr.ReadToEnd();
 
-                log.LogInformation($"Sending, {message} to {userId} only.");
+                log.LogInformation(String.Format(GlobalMessages.SendingMessageOnlyToUserFormat, message, userId));
 
                 await signalRMessages.AddAsync(
                     new SignalRMessage {
@@ -195,16 +195,32 @@ namespace SignalRCustomAuthServer.Api {
         /// </remarks>
         [FunctionName(nameof(SignalRConnection))]
         public static IActionResult SignalRConnection(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, Global.HttpVerbGet, Route = null)] HttpRequest req,
             IBinder binder,
             ILogger log) {
-            var gateKeeperResult = GateKeeper.ValidateToken(req.Headers);
-            if (gateKeeperResult.Unauthorized) {
-                log.LogError(gateKeeperResult.Exception, gateKeeperResult.LogMessage());
+            var validateTokenResult = GateKeeper.ValidateToken(req.Headers);
+            if (validateTokenResult.Unauthorized) {
+                log.LogError(validateTokenResult.Exception, validateTokenResult.LogMessage());
                 return new UnauthorizedResult();
             }
 
-            var connectionInfo = binder.Bind<SignalRConnectionInfo>(new SignalRConnectionInfoAttribute { HubName = Global.SignalRHubName, UserId = gateKeeperResult.TokenModel.UserId });
+            var connectionInfo = binder.Bind<SignalRConnectionInfo>(new SignalRConnectionInfoAttribute { HubName = Global.SignalRHubName, UserId = validateTokenResult.TokenModel.UserId });
+            return new OkObjectResult(connectionInfo);
+        }
+
+        // here to compare with the above version.  This version takes the UserId in the header, not as secure as the above technique.
+        // this version uses an input binding while the above version uses an output binding which providers great control for creating the token.
+        [FunctionName(nameof(SignalRConnectionNotAsSecure))]
+        public static IActionResult SignalRConnectionNotAsSecure(
+            [HttpTrigger(AuthorizationLevel.Anonymous, Global.HttpVerbGet, Route = null)] HttpRequest req,
+            [SignalRConnectionInfo(HubName = Global.SignalRHubName, UserId = "{headers.x-ms-client-principal-id}")] SignalRConnectionInfo connectionInfo,
+            IBinder binder,
+            ILogger log) {
+            var validateTokenResult = GateKeeper.ValidateToken(req.Headers);
+            if (validateTokenResult.Unauthorized) {
+                log.LogError(validateTokenResult.Exception, validateTokenResult.LogMessage());
+                return new UnauthorizedResult();
+            }
             return new OkObjectResult(connectionInfo);
         }
     }
