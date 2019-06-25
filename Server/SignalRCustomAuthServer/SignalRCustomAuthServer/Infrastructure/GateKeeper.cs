@@ -27,9 +27,9 @@
                     var tokenModel = TokenModel.CreateFromClaims(claimsPrincipal.Claims);
                     return new ValidateTokenResult(tokenModel);
                 }
-                return new ValidateTokenResult(new InvalidOperationException("Bearer missing"));
+                return new ValidateTokenResult(new InvalidOperationException(Global.BearerMissing));
             }
-            return new ValidateTokenResult(new InvalidOperationException("Authorization header missing."));
+            return new ValidateTokenResult(new InvalidOperationException(Global.AuthorizationHeaderMissing));
         }
     }
 }

@@ -4,8 +4,10 @@
 
     public class Global {
         public const String Audience = "https://oceanware.wordpress.com";
+        public const String AuthorizationHeaderMissing = "Authorization header missing.";
         public const String AuthorizationHeaderName = "Authorization";
         public const String AzureWebJobsStorage = "AzureWebJobsStorage";
+        public const String BearerMissing = "Bearer missing";
         public const String BearerPrefix = "Bearer ";
         public const String ClaimAudience = "aud";
         public const String ClaimExpires = "exp";
@@ -25,5 +27,6 @@
         public const String UserName = "UserName";
         public const String UserPartitionKey = "AzureRocks";
         public const String UserTableName = "Users";
+
     }
 }
