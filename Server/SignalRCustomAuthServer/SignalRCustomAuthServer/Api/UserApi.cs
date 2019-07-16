@@ -191,7 +191,7 @@ namespace SignalRCustomAuthServer.Api {
         /// <para>http://dontcodetired.com/blog/post/Dynamic-Binding-in-Azure-Functions-with-Imperative-Runtime-Bindings </para>
         /// <para>http://dontcodetired.com/blog/post/Creating-Custom-Azure-Functions-Bindings</para>
         /// <para>The GateKeeper validates the Authentication token. Yes there is some ceremony code for each method, but I prefer to be in control and the code is simple.</para>
-        /// <para>Ben Morris has published an alturnative solution using an input binding to perform the validation, this solution has much less ceremony code. https://www.ben-morris.com/custom-token-authentication-in-azure-functions-using-bindings/</para>
+        /// <para>Ben Morris has published an alternative solution using an input binding to perform the validation, this solution has much less ceremony code. https://www.ben-morris.com/custom-token-authentication-in-azure-functions-using-bindings/ </para>
         /// </remarks>
         [FunctionName(nameof(SignalRConnection))]
         public static IActionResult SignalRConnection(
